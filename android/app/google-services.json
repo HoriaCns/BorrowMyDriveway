@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "194426924267",
+    "project_id": "borrowmydriveway",
+    "storage_bucket": "borrowmydriveway.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194426924267:android:2363aef84b3107efd522ae",
+        "android_client_info": {
+          "package_name": "com.example.borrow_my_driveway"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdpaatFG6jtZFdoFgAEjVV8KEd2JmZ7oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
