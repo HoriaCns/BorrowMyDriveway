@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../services/appwrite_client.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function()? onTap;
-
   const LoginScreen({super.key, required this.onTap});
 
   @override
@@ -13,46 +14,25 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _errorMessage = '';
+  String _errorMessage = '';
 
-  // Sign in method
   Future<void> signIn() async {
-    setState(() {
-      _errorMessage = ''; // clear previous errors
-    });
-
-    // Show loading circle
-    showDialog(context: context,
-        builder: (context) => const Center(child: CircularProgressIndicator()));
+    showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(), 
-          password: _passwordController.text.trim(),
-      );
-      // Pop loading circle
+      final appwriteClient = context.read<AppwriteClient>();
+      await appwriteClient.login(_emailController.text, _passwordController.text);
+      if (mounted) Navigator.pop(context); // Pop loading circle
+    } on AppwriteException catch (e) {
       if (mounted) Navigator.pop(context);
-      
-    } on FirebaseAuthException catch (e) {
-      if (mounted) Navigator.pop(context);
-      setState(() {
-        _errorMessage = e.message;
-      });
+      setState(() { _errorMessage = e.message ?? 'An unknown error occurred'; });
     }
   }
-  
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-
+  // ... rest of the build method is identical to the Firebase version
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -68,9 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
                 const SizedBox(height: 16),
                 TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
-                if(_errorMessage!.isNotEmpty) ...[
+                if (_errorMessage.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                  Text(_errorMessage, style: const TextStyle(color: Colors.red)),
                 ],
                 const SizedBox(height: 24),
                 SizedBox(width: double.infinity, child: ElevatedButton(onPressed: signIn, child: const Text('Login'))),
@@ -83,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     GestureDetector(
                       onTap: widget.onTap,
                       child: Text('Register now', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
-                    )
+                    ),
                   ],
                 ),
               ],

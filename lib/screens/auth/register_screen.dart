@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../services/appwrite_client.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function()? onTap;
@@ -11,50 +12,29 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _nameController = TextEditingController(); // Added name
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String? _errorMessage = '';
+  String _errorMessage = '';
 
   Future<void> signUp() async {
-    setState(() { _errorMessage = ''; });
-
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() { _errorMessage = "Passwords don't match!"; });
       return;
     }
-
     showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
 
     try {
-      // Create user in Firebase Auth
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // Create a document for the user in Firestore
-      await FirebaseFirestore.instance.collection("users").doc(userCredential.user!.uid).set({
-        'email': _emailController.text.trim(),
-        'createdAt': Timestamp.now(),
-        // Add other user details here in the future
-      });
-
+      final appwriteClient = context.read<AppwriteClient>();
+      await appwriteClient.register(_emailController.text, _passwordController.text, _nameController.text);
       if (mounted) Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
+    } on AppwriteException catch (e) {
       if (mounted) Navigator.pop(context);
-      setState(() { _errorMessage = e.message; });
+      setState(() { _errorMessage = e.message ?? 'An unknown error occurred'; });
     }
   }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
+  // ... build method is mostly the same, just with an added Name field
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,14 +51,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const Text('Create an Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                 const Text('Get started by creating your account', style: TextStyle(fontSize: 16, color: Colors.grey)),
                 const SizedBox(height: 40),
+                TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name')),
+                const SizedBox(height: 16),
                 TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
                 const SizedBox(height: 16),
                 TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
                 const SizedBox(height: 16),
                 TextField(controller: _confirmPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'Confirm Password')),
-                if (_errorMessage!.isNotEmpty) ...[
+                if (_errorMessage.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                  Text(_errorMessage, style: const TextStyle(color: Colors.red)),
                 ],
                 const SizedBox(height: 24),
                 SizedBox(width: double.infinity, child: ElevatedButton(onPressed: signUp, child: const Text('Sign Up'))),
