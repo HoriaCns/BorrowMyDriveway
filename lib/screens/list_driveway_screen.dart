@@ -52,10 +52,6 @@ class _ListDrivewayScreenState extends State<ListDrivewayScreen> {
       // 2. Get the public URL for the image
       final imageUrl = '${AppwriteClient.endpoint}/storage/buckets/${AppwriteClient.storageBucketId}/files/${file.$id}/view?project=${AppwriteClient.projectId}';
 
-      // **UPDATED LOGIC**: Convert price from pounds (double) to pence (int)
-      final priceInDouble = double.tryParse(_priceController.text.trim()) ?? 0.0;
-      final priceInPence = (priceInDouble * 100).toInt();
-
       // 3. Save driveway details to Appwrite Database
       await appwriteClient.databases.createDocument(
         databaseId: AppwriteClient.databaseId,
@@ -65,7 +61,7 @@ class _ListDrivewayScreenState extends State<ListDrivewayScreen> {
           'ownerId': user.$id,
           'address': _addressController.text.trim(),
           'description': _descriptionController.text.trim(),
-          'price': priceInPence, // Save as integer
+          'price': _priceController.text.trim(), // **UPDATED LOGIC**: Save as a string
           'imageUrl': imageUrl,
         },
         permissions: [
@@ -126,7 +122,7 @@ class _ListDrivewayScreenState extends State<ListDrivewayScreen> {
               const SizedBox(height: 24),
               TextFormField(controller: _addressController, decoration: const InputDecoration(labelText: 'Full Address'), validator: (value) => value!.isEmpty ? 'Please enter an address' : null),
               const SizedBox(height: 16),
-              TextFormField(controller: _priceController, decoration: const InputDecoration(labelText: 'Price per Hour (£)'), keyboardType: const TextInputType.numberWithOptions(decimal: true), validator: (value) => value!.isEmpty ? 'Please enter a price' : null),
+              TextFormField(controller: _priceController, decoration: const InputDecoration(labelText: 'Price per Hour (£)'), validator: (value) => value!.isEmpty ? 'Please enter a price' : null),
               const SizedBox(height: 16),
               TextFormField(controller: _descriptionController, decoration: const InputDecoration(labelText: 'Short Description (optional)'), maxLines: 3),
               const SizedBox(height: 32),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class DrivewayCard extends StatelessWidget {
   final String address;
-  final double price;
+  final String? price;
   final String? imageUrl;
 
   const DrivewayCard({
@@ -59,7 +59,7 @@ class DrivewayCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '£${price.toStringAsFixed(2)} / hour',
+                  '£$price / hour',
                   style: TextStyle(
                     fontSize: 16,
                     color: Theme.of(context).colorScheme.primary,

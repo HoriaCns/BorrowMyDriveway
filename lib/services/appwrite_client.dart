@@ -11,7 +11,7 @@ class AppwriteClient extends ChangeNotifier {
 
   // Appwrite Project Details - REPLACE WITH YOURS
   static const String endpoint = 'https://cloud.appwrite.io/v1';
-  static const String projectId = '688795acbbfe317f481a'; // Replace with your Project ID
+  static const String projectId = '68878bd2001caf3e69b1'; // Replace with your Project ID
   static const String databaseId = '68878cb5003c518d7758'; // Replace with your Database ID
   static const String drivewaysCollectionId = '68878cc8002c9aefa049'; // Replace
   static const String storageBucketId = '68878db4000a2b4431c0'; // Replace

@@ -43,7 +43,8 @@ class HomeScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                // Display a more user-friendly error message
+                return const Center(child: Text('Error loading driveways. Please try again later.'));
               }
               if (!snapshot.hasData || snapshot.data!.documents.isEmpty) {
                 return const Center(
@@ -59,16 +60,31 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 itemCount: driveways.length,
                 itemBuilder: (context, index) {
-                  final drivewayData = driveways[index].data;
-                  // **UPDATED LOGIC**: Convert price from pence (int) to pounds (double)
-                  final priceInPence = drivewayData['price'] as int? ?? 0;
-                  final priceInPounds = priceInPence / 100.0;
+                  try { // **PROFESSIONAL SOLUTION**: Add a try-catch block for each card
+                    final drivewayData = driveways[index].data;
 
-                  return DrivewayCard(
-                    address: drivewayData['address'] ?? 'No Address',
-                    price: priceInPounds,
-                    imageUrl: drivewayData['imageUrl'],
-                  );
+                    // Robustly parse the price to prevent type errors.
+                    // This code now handles if the price is a String, int, or double.
+                    final priceData = drivewayData['price'];
+                    String? priceInPounds = "0.0";
+                    if (priceData is String) {
+                      priceInPounds = priceData;
+                    } else if (priceData is num) { // num covers both int and double
+                      priceInPounds = priceData as String?;
+                    }
+
+                    return DrivewayCard(
+                      address: drivewayData['address'] ?? 'No Address',
+                      price: priceInPounds,
+                      imageUrl: drivewayData['imageUrl'],
+                    );
+                  } catch (e) {
+                    // If one card fails to build due to bad data,
+                    // return an empty container instead of crashing the app.
+                    // Also, print the error to the debug console.
+                    debugPrint('Could not build DrivewayCard for document at index $index: $e');
+                    return Container(); // Return an empty widget on error
+                  }
                 },
               );
             },
