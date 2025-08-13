@@ -1,58 +1,65 @@
 import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/models.dart' as Models;
+import 'package:appwrite/models.dart' as models;
 import 'package:borrow_my_driveway/constants.dart';
 import 'package:borrow_my_driveway/providers/auth_provider.dart';
+import 'package:borrow_my_driveway/screens/edit_driveway_screen.dart';
 import 'package:borrow_my_driveway/screens/list_driveway_screen.dart';
 import 'package:borrow_my_driveway/service_locator.dart';
 import 'package:borrow_my_driveway/widgets/driveway_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MyListingsScreen extends StatefulWidget {
+  const MyListingsScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MyListingsScreen> createState() => _MyListingsScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MyListingsScreenState extends State<MyListingsScreen> {
   final Databases _databases = getIt<Databases>();
-  Future<Models.DocumentList>? _drivewaysFuture;
+  Future<models.DocumentList>? _drivewaysFuture;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadDriveways();
   }
 
   void _loadDriveways() {
-    _drivewaysFuture = _databases.listDocuments(
-      databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.drivewaysCollectionId,
-    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.user?.$id;
+
+    if (userId != null) {
+      _drivewaysFuture = _databases.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.drivewaysCollectionId,
+        queries: [
+          Query.equal('ownerId', userId),
+        ],
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the user from the AuthProvider
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(user != null ? 'Welcome, ${user.name}' : 'Available Driveways'),
+        title: Text(user != null ? 'Welcome, ${user.name}' : 'My Driveways'),
         actions: [
           IconButton(
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),
             onPressed: () {
-              // Use the AuthProvider to handle logout
-              Provider.of<AuthProvider>(context, listen: false).logout();
+              authProvider.logout();
             },
           ),
         ],
       ),
-      body: FutureBuilder<Models.DocumentList>(
+      body: FutureBuilder<models.DocumentList>(
         future: _drivewaysFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.documents.isEmpty) {
-            return const Center(child: Text('No driveways listed yet. Be the first!'));
+            return const Center(child: Text('You haven\'t listed any driveways yet.'));
           }
 
           final driveways = snapshot.data!.documents;
@@ -79,11 +86,26 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8.0),
               itemCount: driveways.length,
               itemBuilder: (context, index) {
-                final driveway = driveways[index].data;
+                final drivewayDocument = driveways[index];
                 return DrivewayCard(
-                  address: driveway['address'],
-                  price: driveway['price'],
-                  imageUrl: driveway['imageUrl'],
+                  address: drivewayDocument.data['address'],
+                  price: drivewayDocument.data['price'],
+                  imageUrl: drivewayDocument.data['imageUrl'],
+                  onLongPress: () async {
+                    // Navigate to the edit screen and wait for a result
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditDrivewayScreen(drivewayDocument: drivewayDocument),
+                      ),
+                    );
+                    // If the result is true, it means a change was made, so refresh the list
+                    if (result == true) {
+                      setState(() {
+                        _loadDriveways();
+                      });
+                    }
+                  },
                 );
               },
             ),
@@ -96,7 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             MaterialPageRoute(builder: (context) => const ListDrivewayScreen()),
           );
-          // If a driveway was successfully added, refresh the list
           if (result == true) {
             setState(() {
               _loadDriveways();

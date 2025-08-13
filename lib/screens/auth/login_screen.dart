@@ -1,10 +1,12 @@
-import 'package:appwrite/appwrite.dart';
+import 'package:borrow_my_driveway/common/custom_button.dart';
+import 'package:borrow_my_driveway/common/custom_textfield.dart';
+import 'package:borrow_my_driveway/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:provider/provider.dart';
-import '../../services/appwrite_client.dart';
 
 class LoginScreen extends StatefulWidget {
-  final Function()? onTap;
+  final void Function()? onTap;
   const LoginScreen({super.key, required this.onTap});
 
   @override
@@ -12,61 +14,97 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  String _errorMessage = '';
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  Future<void> signIn() async {
-    showDialog(context: context, builder: (context) => const Center(child: CircularProgressIndicator()));
+  void login() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
 
-    try {
-      final appwriteClient = context.read<AppwriteClient>();
-      await appwriteClient.login(_emailController.text, _passwordController.text);
-      if (mounted) Navigator.pop(context); // Pop loading circle
-    } on AppwriteException catch (e) {
-      if (mounted) Navigator.pop(context);
-      setState(() { _errorMessage = e.message ?? 'An unknown error occurred'; });
+      try {
+        await Provider.of<AuthProvider>(context, listen: false).login(
+          _emailController.text,
+          _passwordController.text,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
-  // ... rest of the build method is identical to the Firebase version
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.directions_car_filled, size: 80, color: Color(0xFF0052D4)),
-                const SizedBox(height: 20),
-                const Text('Welcome Back!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                const Text('Login to continue', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                const SizedBox(height: 40),
-                TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-                const SizedBox(height: 16),
-                TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
-                if (_errorMessage.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.lock_open_rounded, size: 100, color: Colors.black54),
+                  const SizedBox(height: 25),
+                  const Text(
+                    "Welcome back, you've been missed!",
+                    style: TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 50),
+                  CustomTextField(
+                    controller: _emailController,
+                    hintText: 'Email',
+                    validator: MultiValidator([
+                      RequiredValidator(errorText: 'Email is required'),
+                      EmailValidator(errorText: 'Enter a valid email address'),
+                    ]),
+                  ),
+                  const SizedBox(height: 15),
+                  CustomTextField(
+                    controller: _passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    validator: RequiredValidator(errorText: 'Password is required'),
+                  ),
+                  const SizedBox(height: 30),
+                  CustomButton(
+                    onPressed: login,
+                    text: 'Login',
+                    isLoading: _isLoading,
+                  ),
+                  const SizedBox(height: 50),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Not a member?'),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        child: Text(
+                          'Register now',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
-                const SizedBox(height: 24),
-                SizedBox(width: double.infinity, child: ElevatedButton(onPressed: signIn, child: const Text('Login'))),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account?"),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: Text('Register now', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),

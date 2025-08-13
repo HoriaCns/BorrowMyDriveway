@@ -8,14 +8,14 @@ import 'package:borrow_my_driveway/widgets/driveway_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MarketScreen extends StatefulWidget {
+  const MarketScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MarketScreen> createState() => _MarketScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MarketScreenState extends State<MarketScreen> {
   final Databases _databases = getIt<Databases>();
   Future<Models.DocumentList>? _drivewaysFuture;
 
@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadDriveways() {
+    // Fetches all documents from the driveways collection
     _drivewaysFuture = _databases.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.drivewaysCollectionId,
@@ -34,20 +35,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the user from the AuthProvider
-    final authProvider = Provider.of<AuthProvider>(context);
-    final user = authProvider.user;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(user != null ? 'Welcome, ${user.name}' : 'Available Driveways'),
+        title: const Text('Marketplace'),
         actions: [
           IconButton(
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),
             onPressed: () {
-              // Use the AuthProvider to handle logout
-              Provider.of<AuthProvider>(context, listen: false).logout();
+              authProvider.logout();
             },
           ),
         ],
@@ -89,22 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(builder: (context) => const ListDrivewayScreen()),
-          );
-          // If a driveway was successfully added, refresh the list
-          if (result == true) {
-            setState(() {
-              _loadDriveways();
-            });
-          }
-        },
-        tooltip: 'List a new driveway',
-        child: const Icon(Icons.add),
       ),
     );
   }
