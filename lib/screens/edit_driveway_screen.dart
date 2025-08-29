@@ -171,7 +171,7 @@ class _EditDrivewayScreenState extends State<EditDrivewayScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _priceType,
-                      decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(12)), focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor), borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Color(0xFFFFFBF5)),
+                      decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(12)), focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor), borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Colors.grey[200]),
                       items: <String>['per hour', 'per day'].map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
                       onChanged: (String? newValue) => setState(() => _priceType = newValue!),
                     ),
@@ -182,7 +182,7 @@ class _EditDrivewayScreenState extends State<EditDrivewayScreen> {
               TextFormField(
                 controller: _commentsController,
                 maxLines: 4,
-                decoration: InputDecoration(hintText: 'e.g: Driveway\'s gate is closed, please call me to open the gate', alignLabelWithHint: true, labelText: 'Any comments', enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(12)), focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor), borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Color(0xFFFFFBF5)),
+                decoration: InputDecoration(hintText: 'e.g: Driveway\'s gate is closed, please call me to open the gate', alignLabelWithHint: true, labelText: 'Any comments', enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(12)), focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor), borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Colors.grey[200]),
               ),
               const SizedBox(height: 24),
               // Note: Image editing is not included in this step for simplicity.
