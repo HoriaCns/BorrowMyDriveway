@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Color(0xFFFFFBF5),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -57,11 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.lock_open_rounded, size: 100, color: Colors.black54),
+                  const Icon(Icons.lock_open_rounded, size: 100, color: Color(0xFF1F2937)),
                   const SizedBox(height: 25),
                   const Text(
                     "Welcome back, you've been missed!",
-                    style: TextStyle(fontSize: 18, color: Colors.black54),
+                    style: TextStyle(fontSize: 18, color: Color(0xFF1F2937)),
                   ),
                   const SizedBox(height: 50),
                   CustomTextField(
@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Register now',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
+                            color: Color(0xFF10B981),
                           ),
                         ),
                       ),
