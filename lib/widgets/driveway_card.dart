@@ -19,6 +19,7 @@ class DrivewayCard extends StatelessWidget {
     return GestureDetector( // Wrap the Card with GestureDetector
       onLongPress: onLongPress,
       child: Card(
+        color: Color(0xFFFFFBF5),
         elevation: 4.0,
         margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
         shape: RoundedRectangleBorder(
@@ -40,7 +41,7 @@ class DrivewayCard extends StatelessWidget {
                   if (loadingProgress == null) return child;
                   return Container(
                     height: 200,
-                    color: Colors.grey[200],
+                    color: Color(0xFFFFFBF5),
                     child: Center(
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
@@ -53,7 +54,7 @@ class DrivewayCard extends StatelessWidget {
                 errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                   return Container(
                     height: 200,
-                    color: Colors.grey[200],
+                    color: Color(0xFFFFFBF5),
                     child: const Center(
                       child: Icon(Icons.error_outline, color: Colors.red, size: 50),
                     ),
@@ -80,7 +81,7 @@ class DrivewayCard extends StatelessWidget {
                     price,
                     style: TextStyle(
                       fontSize: 18.0,
-                      color: Theme.of(context).primaryColor,
+                      color: Color(0xFF10B981),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
